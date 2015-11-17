@@ -1,0 +1,26 @@
+{
+    "name": "jesuso/yii2-widget-block-models",
+    "description": "An enhanced Yii 2 widget encapsulating the HTML 5 color input (sub repo split from yii2-widgets)",
+    "keywords": ["yii2", "extension", "widget", "form", "model", "input", "html5", "ajax", "plugin"],
+    "homepage": "https://github.com/jesuso/yii2-widget-block-models",
+    "type": "yii2-extension",
+    "license": "BSD 3-Clause",
+    "authors": [
+        {
+            "name": "Jesus Ignacio Ortiz Beltran",
+            "email": "jesuso.1410@gmail.com"
+        },
+        {
+            "name": "Charlie Córdova",
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "yiisoft/yii2-bootstrap": "@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "jesuso\\blockmodels\\": ""
+        }
+    }
+}
