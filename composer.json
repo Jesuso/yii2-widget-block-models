@@ -1,7 +1,8 @@
 {
-    "name": "jesuso/yii2-widget-block-models",
+    "name": "jesuso/blockmodels",
     "keywords": ["yii2", "extension", "widget", "form", "model", "input", "html5", "ajax", "plugin"],
     "type": "yii2-extension",
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Jesus Ignacio Ortiz Beltran",
@@ -15,8 +16,8 @@
         "yiisoft/yii2-bootstrap": "@dev"
     },
     "autoload": {
-        "psr-0": {
-          "Jesuso": "src"
+        "psr-4": {
+            "jesuso\\blockmodels\\": ""
         }
     }
 }
