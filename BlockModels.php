@@ -5,6 +5,8 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
+use yii\widgets\ActiveForm;
+use kartik\icons\Icon;
 
 class BlockModels extends \yii\base\Widget
 {
@@ -14,6 +16,8 @@ class BlockModels extends \yii\base\Widget
     public function init()
     {
         parent::init();
+        // Load kartic icons
+        Icon::map(Yii::$app->view);
 
         $this->registerAssets();
 
@@ -27,37 +31,49 @@ class BlockModels extends \yii\base\Widget
         $models = array_values($this->dataProvider->getModels());
         $keys = $this->dataProvider->getKeys();
         $rows = [];
+        $content = '<ul class="blockmodels">';
 
         foreach ($models as $index => $model) {
             $key = $keys[$index];
             $rows[] = $this->renderModel($model, $key, $index);
         }
 
-        return implode("\n", $rows);
+        $content .= implode("\n", $rows);
+        $content .= '</ul>';
+
+        return $content;
     }
 
     private function renderModel($model, $key, $index)
     {
-        $result = '<div class="blockmodels">';
+        ob_start();
+        echo'<li class="blockmodel">';
+        $form = ActiveForm::begin();
 
         // Header
-        $result .= '<div class="row">';
-        $result .= '<i class="fa fa-bars">Drag</i>';
-        $result .= '<i class="fa fa-times">Delete</i>';
-        $result .= '</div>';
+        echo '<div class="row">';
+        echo Icon::show('arrows', ['class' => 'handle fa-2x']);
+        echo Icon::show('times', ['class' => 'delete fa-2x']);
+        echo '</div>';
 
         // Attributes
+        echo '<div><table><tbody>';
         foreach ($model->attributes as $key => $value)
         {
-            $result .= '<div>';
-            $result .= Html::activeLabel($model, $key);
-            $result .= Html::activeInput('text', $model, $key);
-            $result .= '</div>';
+            if (in_array($key, $this->columns)) {
+                echo '<tr>';
+                echo $form->field($model, $key);
+                //echo '<td>'.Html::activeLabel($model, $key).'</td>';
+                //echo '<td>'.Html::activeInput('text', $model, $key).'</td>';
+                echo '</tr>';
+            }
         }
+        echo '</tbody></table></div>';
 
-        $result .= '</div>';
+        ActiveForm::end();
+        echo '</li>'; // .blockmodels
         // $result .= "<pre>\n".print_r($model->attributes, true)."\n</pre>";
-        return $result;
+        return ob_get_clean();
     }
 
     /**

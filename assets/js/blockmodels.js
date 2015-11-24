@@ -1,0 +1,1 @@
+$(".blockmodels").draggable({ handle: ".handle" });
