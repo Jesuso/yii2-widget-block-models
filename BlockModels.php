@@ -12,6 +12,8 @@ class BlockModels extends \yii\base\Widget
 {
     public $dataProvider;
     public $columns;
+    public $id_attribute;
+    public $order_by;
 
     public function init()
     {
@@ -48,7 +50,7 @@ class BlockModels extends \yii\base\Widget
     {
         ob_start();
         echo'<li class="blockmodel">';
-        $form = ActiveForm::begin();
+        $form = ActiveForm::begin(['action' => ['update', 'id' => $model->{$this->id_attribute}]]);
 
         // Header
         echo '<div class="row">';
@@ -57,18 +59,24 @@ class BlockModels extends \yii\base\Widget
         echo '</div>';
 
         // Attributes
-        echo '<div><table><tbody>';
+        echo '<div>';
         foreach ($model->attributes as $key => $value)
         {
-            if (in_array($key, $this->columns)) {
-                echo '<tr>';
-                echo $form->field($model, $key);
+            $options = [];
+
+            if (is_array($this->columns) && !in_array($key, $this->columns)) {
+
+            } else {
+                if ($key == $this->order_by) {
+                    $options['class'] = 'order';
+                }
+
+                echo $form->field($model, $key, ['options' => $options]);
                 //echo '<td>'.Html::activeLabel($model, $key).'</td>';
                 //echo '<td>'.Html::activeInput('text', $model, $key).'</td>';
-                echo '</tr>';
             }
         }
-        echo '</tbody></table></div>';
+        echo '</div>';
 
         ActiveForm::end();
         echo '</li>'; // .blockmodels

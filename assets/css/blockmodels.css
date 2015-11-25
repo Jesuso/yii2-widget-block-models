@@ -1,5 +1,58 @@
 .blockmodels {
-    width: 24%;
-    margin: 0.5%;
-    border: 1px solid black;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.blockmodel {
+    padding: 40px 0 0;
+    float: left;
+    /* width: 250px; */
+    margin: 10px;
+    border: 1px solid rgb(180,180,180);
+    background-color: rgb(255,255,255);
+    color: rgb(85,85,85);
+    position: relative;
+}
+
+.blockmodel table {
+    width: 100%;
+}
+
+.blockmodel table input {
+    margin: 0 0 2px 0;
+}
+
+.blockmodel .handle {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    cursor: pointer;
+}
+
+.blockmodel .delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+}
+
+.blockmodel label.control-label {
+    width: 45%;
+    display: inline-block;
+    text-align: right;
+}
+
+.blockmodel input.form-control {
+    width: 45%;
+    display: inline-block;
+}
+
+.blockmodel.saving {
+    background-color: rgb(255,0,0);
+}
+
+.blockmodel.saved {
+    background-color: rgb(0,255,0);
 }
