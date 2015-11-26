@@ -60,21 +60,35 @@ class BlockModels extends \yii\base\Widget
 
         // Attributes
         echo '<div>';
-        foreach ($model->attributes as $key => $value)
+        foreach ($this->columns as $column)
         {
+            // Make sure the $columns is a key => value array, if not, then
+            // convert it into one so we can work with it.
+            if (!is_array($column)) {
+                $column = ['attribute' => $column];
+            }
+
+            // First, we make sure that the model actually contains such attribute.
+            if (!array_key_exists($column['attribute'], $model->attributes)) {
+                throw new InvalidConfigException('The model does not contain such attribute. ' . $column['attribute']);
+            }
+
             $options = [];
 
-            if (is_array($this->columns) && !in_array($key, $this->columns)) {
-
-            } else {
-                if ($key == $this->order_by) {
-                    $options['class'] = 'order';
-                }
-
-                echo $form->field($model, $key, ['options' => $options]);
-                //echo '<td>'.Html::activeLabel($model, $key).'</td>';
-                //echo '<td>'.Html::activeInput('text', $model, $key).'</td>';
+            // If the user specified an order field and its the current one then
+            // we add an order class to the field container for javascript atomation
+            // purposes.
+            if ($column['attribute'] == $this->order_by) {
+                $options['class'] = 'order';
             }
+
+            if (isset($column['widget'])) {
+                echo $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
+            } else {
+                echo $form->field($model, $column['attribute'], ['options' => $options]);
+            }
+            //echo '<td>'.Html::activeLabel($model, $key).'</td>';
+            //echo '<td>'.Html::activeInput('text', $model, $key).'</td>';
         }
         echo '</div>';
 

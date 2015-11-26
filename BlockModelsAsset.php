@@ -7,7 +7,7 @@ class BlockModelsAsset extends \yii\web\AssetBundle
 
     public $js = self::BM_ASSET;
     public $css = self::BM_ASSET;
-    public $sourcePath = __DIR__ . '/assets';
+    public $sourcePath;
     public $depends = [
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
@@ -17,6 +17,9 @@ class BlockModelsAsset extends \yii\web\AssetBundle
     public function init()
     {
         parent::init();
+
+        $this->sourcePath = __DIR__ . '/assets';
+
         $this->setupAssets('css', ['css/blockmodels']);
         $this->setupAssets('js', ['js/blockmodels']);
     }
