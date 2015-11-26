@@ -1,7 +1,7 @@
 // Run saveModel for all models every time an object is re-ordered.
 $(".blockmodels").sortable({
     revert: true,
-    handle: '.handle',
+    handle: '.drag-btn',
     update: function (event, ui) {
         var form = $(event.toElement).find('form');
         reorderModels();

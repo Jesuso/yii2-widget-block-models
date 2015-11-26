@@ -54,8 +54,21 @@ class BlockModels extends \yii\base\Widget
 
         // Header
         echo '<div class="row">';
-        echo Icon::show('arrows', ['class' => 'handle fa-2x']);
-        echo Icon::show('times', ['class' => 'delete fa-2x']);
+        echo Html::a(Icon::show('arrows', ['class' => 'drag-btn fa-2x']), null, [
+            'title' => Yii::t('yii', 'Move'),
+            'aria-label' => Yii::t('yii', 'Move'),
+        ]);
+        echo Html::a(Icon::show('pencil', ['class' => 'edit-btn fa-2x']), null, [
+            'title' => Yii::t('yii', 'Edit'),
+            'aria-label' => Yii::t('yii', 'Edit'),
+        ]);
+        echo Html::a(Icon::show('trash', ['class' => 'delete-btn fa-2x']), ['delete', 'id' => $model->{$this->id_attribute}], [
+            'title' => Yii::t('yii', 'Delete'),
+            'aria-label' => Yii::t('yii', 'Delete'),
+            'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+            'data-method' => 'post',
+            'data-pjax' => '0',
+        ]);
         echo '</div>';
 
         // Attributes

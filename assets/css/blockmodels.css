@@ -24,28 +24,36 @@
     margin: 0 0 2px 0;
 }
 
-.blockmodel .handle {
+.blockmodel .drag-btn {
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 0.2em;
+    left: 0.2em;
     cursor: pointer;
 }
 
-.blockmodel .delete {
+.blockmodel .edit-btn {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 0.2em;
+    right: 1.2em;
+    cursor: pointer;
+}
+
+.blockmodel .delete-btn {
+    position: absolute;
+    top: 0.2em;
+    right: 0.2em;
     cursor: pointer;
 }
 
 .blockmodel label.control-label {
-    width: 45%;
+    width: 42%;
     display: inline-block;
     text-align: right;
+    font-weight: normal;
 }
 
 .blockmodel input.form-control {
-    width: 45%;
+    width: 48%;
     display: inline-block;
 }
 
