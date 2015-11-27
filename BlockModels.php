@@ -5,6 +5,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
+use yii\i18n\Formatter;
 use yii\widgets\ActiveForm;
 use kartik\icons\Icon;
 
@@ -14,10 +15,22 @@ class BlockModels extends \yii\base\Widget
     public $columns;
     public $id_attribute;
     public $order_by;
+    public $formatter;
 
     public function init()
     {
         parent::init();
+
+        parent::init();
+        if ($this->formatter == null) {
+            $this->formatter = Yii::$app->getFormatter();
+        } elseif (is_array($this->formatter)) {
+            $this->formatter = Yii::createObject($this->formatter);
+        }
+        if (!$this->formatter instanceof Formatter) {
+            throw new InvalidConfigException('The "formatter" property must be either a Format object or a configuration array.');
+        }
+
         // Load kartic icons
         Icon::map(Yii::$app->view);
 
@@ -58,10 +71,12 @@ class BlockModels extends \yii\base\Widget
             'title' => Yii::t('yii', 'Move'),
             'aria-label' => Yii::t('yii', 'Move'),
         ]);
+        /*
         echo Html::a(Icon::show('pencil', ['class' => 'edit-btn fa-2x']), null, [
             'title' => Yii::t('yii', 'Edit'),
             'aria-label' => Yii::t('yii', 'Edit'),
         ]);
+        */
         echo Html::a(Icon::show('trash', ['class' => 'delete-btn fa-2x']), ['delete', 'id' => $model->{$this->id_attribute}], [
             'title' => Yii::t('yii', 'Delete'),
             'aria-label' => Yii::t('yii', 'Delete'),
@@ -78,7 +93,9 @@ class BlockModels extends \yii\base\Widget
             // Make sure the $columns is a key => value array, if not, then
             // convert it into one so we can work with it.
             if (!is_array($column)) {
-                $column = ['attribute' => $column];
+                $column = ['attribute' => $column, 'format' => 'text'];
+            } else if (!isset($column['format'])) {
+                $column['format'] = 'text';
             }
 
             // First, we make sure that the model actually contains such attribute.
@@ -97,6 +114,13 @@ class BlockModels extends \yii\base\Widget
 
             if (isset($column['widget'])) {
                 echo $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
+            } else if ($column['format'] == 'image') {
+                if (!isset($column['baseUrl'])) {
+                    throw new InvalidConfigException('A column of type image must have a baseUrl set');
+                }
+                // Show the image if there is one already a value in this attribute
+                echo Html::img($column['baseUrl'].$model->image, ['class' => 'image']);
+                echo $form->field($model, $column['attribute'], ['options' => $options])->fileInput();
             } else {
                 echo $form->field($model, $column['attribute'], ['options' => $options]);
             }

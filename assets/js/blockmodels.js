@@ -3,8 +3,8 @@ $(".blockmodels").sortable({
     revert: true,
     handle: '.drag-btn',
     update: function (event, ui) {
-        var form = $(event.toElement).find('form');
-        reorderModels();
+        var blockmodels = $(event.target);
+        reorderModels(blockmodels);
     },
 });
 
@@ -21,12 +21,19 @@ $(".blockmodels form input").on('change', function (event) {
 function saveModel (form) {
     form.parent().addClass('saving');
 
+    // We want to send an image, so we use FormData
+    var data = new FormData($(form)[0]);
+
     $.ajax({
         url: $(form).attr('action'),
         type: 'POST',
-        data: $(form).serialize(),
+        data: data,
+        dataType: 'json',
+        contentType: false,
+        processData: false,
         success: function (data) {
-            console.log(data);
+            // Update the image
+            $(form).find('.image').attr('src', data.model.image);
 
             form.parent().removeClass('saving').addClass('saved');
             setTimeout(function () {
@@ -41,10 +48,10 @@ function saveModel (form) {
  * then saves the models one by one, following the order in which they are now
  * saved.
  */
-function reorderModels () {
+function reorderModels (blockmodels) {
     console.log("Reordering models...");
 
-    $(".blockmodels form").each(function (index, form) {
+    blockmodels.find("form").each(function (index, form) {
         // Save the current order in a variable
         var order = $(form).find('.order input').val();
 
