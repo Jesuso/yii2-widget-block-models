@@ -17,10 +17,10 @@ class BlockModels extends \yii\base\Widget
     public $order_by;
     public $formatter;
 
+    private $modelClass;
+
     public function init()
     {
-        parent::init();
-
         parent::init();
         if ($this->formatter == null) {
             $this->formatter = Yii::$app->getFormatter();
@@ -39,6 +39,10 @@ class BlockModels extends \yii\base\Widget
         if ($this->dataProvider === null) {
             throw new InvalidConfigException('The "dataProvider" property must be set.');
         }
+
+        $this->modelClass = $this->dataProvider->getModels()[0]->className();
+
+        $this->normalizeColumns();
     }
 
     public function run()
@@ -53,41 +57,20 @@ class BlockModels extends \yii\base\Widget
             $rows[] = $this->renderModel($model, $key, $index);
         }
 
+        $rows[] = $this->renderNew();
+
         $content .= implode("\n", $rows);
         $content .= '</ul>';
 
         return $content;
     }
 
-    private function renderModel($model, $key, $index)
+    private function normalizeColumns()
     {
-        ob_start();
-        echo'<li class="blockmodel">';
-        $form = ActiveForm::begin(['action' => ['update', 'id' => $model->{$this->id_attribute}]]);
+        // Take one model as base to normalize the columns with its attributes
+        $model = $this->dataProvider->getModels()[0];
+        $columns = [];
 
-        // Header
-        echo '<div class="row">';
-        echo Html::a(Icon::show('arrows', ['class' => 'drag-btn fa-2x']), null, [
-            'title' => Yii::t('yii', 'Move'),
-            'aria-label' => Yii::t('yii', 'Move'),
-        ]);
-        /*
-        echo Html::a(Icon::show('pencil', ['class' => 'edit-btn fa-2x']), null, [
-            'title' => Yii::t('yii', 'Edit'),
-            'aria-label' => Yii::t('yii', 'Edit'),
-        ]);
-        */
-        echo Html::a(Icon::show('trash', ['class' => 'delete-btn fa-2x']), ['delete', 'id' => $model->{$this->id_attribute}], [
-            'title' => Yii::t('yii', 'Delete'),
-            'aria-label' => Yii::t('yii', 'Delete'),
-            'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-            'data-method' => 'post',
-            'data-pjax' => '0',
-        ]);
-        echo '</div>';
-
-        // Attributes
-        echo '<div>';
         foreach ($this->columns as $column)
         {
             // Make sure the $columns is a key => value array, if not, then
@@ -103,6 +86,46 @@ class BlockModels extends \yii\base\Widget
                 throw new InvalidConfigException('The model does not contain such attribute. ' . $column['attribute']);
             }
 
+            array_push($columns, $column);
+        }
+
+        $this->columns = $columns;
+    }
+
+    private function renderModel($model, $key, $index)
+    {
+        $result = '<li class="blockmodel">';
+
+        // ActiveForm::begin is directly echoed out, so we have to use output buffer.
+        ob_start();
+        $form = ActiveForm::begin(['action' => ['update', 'id' => $model->{$this->id_attribute}]]);
+        $result .= ob_get_flush();
+
+        // Header
+        $result .= '<div class="row">';
+        $result .= Html::a(Icon::show('arrows', ['class' => 'drag-btn fa-2x']), null, [
+            'title' => Yii::t('yii', 'Move'),
+            'aria-label' => Yii::t('yii', 'Move'),
+        ]);
+        /*
+        echo Html::a(Icon::show('pencil', ['class' => 'edit-btn fa-2x']), null, [
+            'title' => Yii::t('yii', 'Edit'),
+            'aria-label' => Yii::t('yii', 'Edit'),
+        ]);
+        */
+        $result .= Html::a(Icon::show('trash', ['class' => 'delete-btn fa-2x']), ['delete', 'id' => $model->{$this->id_attribute}], [
+            'title' => Yii::t('yii', 'Delete'),
+            'aria-label' => Yii::t('yii', 'Delete'),
+            'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+            'data-method' => 'post',
+            'data-pjax' => '0',
+        ]);
+        $result .= '</div>';
+
+        // Attributes
+        $result .= '<div>';
+        foreach ($this->columns as $column)
+        {
             $options = [];
 
             // If the user specified an order field and its the current one then
@@ -113,26 +136,81 @@ class BlockModels extends \yii\base\Widget
             }
 
             if (isset($column['widget'])) {
-                echo $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
+                $result .= $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
             } else if ($column['format'] == 'image') {
                 if (!isset($column['baseUrl'])) {
                     throw new InvalidConfigException('A column of type image must have a baseUrl set');
                 }
                 // Show the image if there is one already a value in this attribute
-                echo Html::img($column['baseUrl'].$model->image, ['class' => 'image']);
-                echo $form->field($model, $column['attribute'], ['options' => $options])->fileInput();
+                $result .= Html::img($column['baseUrl'].$model->image, ['class' => 'image']);
+                $result .= $form->field($model, $column['attribute'], ['options' => $options])->fileInput();
             } else {
-                echo $form->field($model, $column['attribute'], ['options' => $options]);
+                $result .= $form->field($model, $column['attribute'], ['options' => $options]);
             }
-            //echo '<td>'.Html::activeLabel($model, $key).'</td>';
-            //echo '<td>'.Html::activeInput('text', $model, $key).'</td>';
+            //$result .= '<td>'.Html::activeLabel($model, $key).'</td>';
+            //$result .= '<td>'.Html::activeInput('text', $model, $key).'</td>';
         }
-        echo '</div>';
+        $result .= '</div>';
 
+        // ActiveForm::end is directly echoed out, so we have to use output buffer.
+        ob_start();
         ActiveForm::end();
-        echo '</li>'; // .blockmodels
+        $result .= ob_get_flush();
+
+        $result .= '</li>'; // .blockmodels
         // $result .= "<pre>\n".print_r($model->attributes, true)."\n</pre>";
-        return ob_get_clean();
+        return $result;
+    }
+
+    private function renderNew()
+    {
+        $model = Yii::createObject($this->modelClass);
+
+        $result = '<li class="blockmodel">';
+
+        // ActiveForm::begin is directly echoed out, so we have to use output buffer.
+        ob_start();
+        $form = ActiveForm::begin(['action' => ['create']]);
+        $result .= ob_get_flush();
+
+        // Attributes
+        $result .= '<div>';
+        foreach ($this->columns as $column)
+        {
+            $options = [];
+
+            // If the user specified an order field and its the current one then
+            // we add an order class to the field container for javascript atomation
+            // purposes.
+            if ($column['attribute'] == $this->order_by) {
+                $options['class'] = 'order';
+            }
+
+            if (isset($column['widget'])) {
+                $result .= $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
+            } else if ($column['format'] == 'image') {
+                if (!isset($column['baseUrl'])) {
+                    throw new InvalidConfigException('A column of type image must have a baseUrl set');
+                }
+                // Show the image if there is one already a value in this attribute
+                $result .= Html::img($column['baseUrl'].$model->image, ['class' => 'image']);
+                $result .= $form->field($model, $column['attribute'], ['options' => $options])->fileInput();
+            } else {
+                $result .= $form->field($model, $column['attribute'], ['options' => $options]);
+            }
+            //$result .= '<td>'.Html::activeLabel($model, $key).'</td>';
+            //$result .= '<td>'.Html::activeInput('text', $model, $key).'</td>';
+        }
+        $result .= '</div>';
+
+        // ActiveForm::end is directly echoed out, so we have to use output buffer.
+        ob_start();
+        ActiveForm::end();
+        $result .= ob_get_flush();
+
+        $result .= '</li>'; // .blockmodels
+        // $result .= "<pre>\n".print_r($model->attributes, true)."\n</pre>";
+        return $result;
     }
 
     /**
