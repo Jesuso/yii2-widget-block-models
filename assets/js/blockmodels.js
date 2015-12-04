@@ -14,6 +14,26 @@ $(".blockmodels form input").on('change', function (event) {
     saveModel(form);
 });
 
+// Creates a new blockmodel
+$('.blockmodel .new_overlay').on('click', function (event) {
+    console.log('Creating new model');
+
+    // Clone the base "template" and remove the new class along with its overlay
+    $new = $('.blockmodel.new').clone().removeClass('new');
+    $new.find('.new_overlay').remove();
+    // And append it to the .blockmodels where this one is
+    $new.appendTo($(this).parents('.blockmodels'));
+
+    // Then move this place holder again to the end of .blockmodels
+    $(this).parent().appendTo('.blockmodels');
+
+    // Finally, append the required behavior to the new element so it updates via ajax
+    $new.find("form input").on('change', function (event) {
+        var form = $(event.target).parents('form');
+        saveModel(form);
+    });
+});
+
 /**
  * Updates the model on the database.
  * @param  DOM   form   The form containing the model data.
@@ -32,8 +52,22 @@ function saveModel (form) {
         contentType: false,
         processData: false,
         success: function (data) {
+            // Display the data for debugging purposes
+            console.log(data);
+
             // Update the image
             $(form).find('.image').attr('src', data.model.image);
+
+            // If this form is a create form we switch it to an update action
+            // once we receive its ID
+            if ($(form).attr('action').indexOf('create') > -1) {
+                var update_action = $(form).attr('data-action-update');
+                var id_attribute = $(form).attr('data-id-attribute');
+                var patched_update_action = update_action.replace('-1', data.model[id_attribute]);
+
+                // Patch the new action based on the new model ID.
+                $(form).attr('action', patched_update_action);
+            }
 
             form.parent().removeClass('saving').addClass('saved');
             setTimeout(function () {

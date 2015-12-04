@@ -5,6 +5,7 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 use yii\i18n\Formatter;
 use yii\widgets\ActiveForm;
 use kartik\icons\Icon;
@@ -162,15 +163,20 @@ class BlockModels extends \yii\base\Widget
         return $result;
     }
 
+    /**
+     * Renders a new model placeholde, which once clicked will create a new model
+     * TODO. This block should somehow be merged with the renderModel.
+     */
     private function renderNew()
     {
         $model = Yii::createObject($this->modelClass);
 
-        $result = '<li class="blockmodel">';
+        $result = '<li class="blockmodel new">';
+        $result .= '<div class="new_overlay"></div>';
 
         // ActiveForm::begin is directly echoed out, so we have to use output buffer.
         ob_start();
-        $form = ActiveForm::begin(['action' => ['create']]);
+        $form = ActiveForm::begin(['action' => ['create'], 'options' => ['data-action-update' => Url::to(['update', 'id' => -1]), 'data-id-attribute' => $this->id_attribute]]);
         $result .= ob_get_flush();
 
         // Attributes
@@ -208,7 +214,7 @@ class BlockModels extends \yii\base\Widget
         ActiveForm::end();
         $result .= ob_get_flush();
 
-        $result .= '</li>'; // .blockmodels
+        $result .= '</li>'; // .blockmodels.new
         // $result .= "<pre>\n".print_r($model->attributes, true)."\n</pre>";
         return $result;
     }

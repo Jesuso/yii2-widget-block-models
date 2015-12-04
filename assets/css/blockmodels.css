@@ -65,3 +65,15 @@
 .blockmodel.saved {
     background-color: rgb(0,255,0);
 }
+
+.blockmodel .new_overlay {
+    position: absolute;
+    top: 0;
+    background-color: rgb(100,100,100);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    opacity: 0.5;
+    cursor: pointer;
+}
