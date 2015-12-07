@@ -136,7 +136,10 @@ class BlockModels extends \yii\base\Widget
                 $options['class'] = 'order';
             }
 
-            if (isset($column['widget'])) {
+            // TODO. DOCUMENT THIS !!!, turn it into something more similar to GridView so people is familiar with it.
+            if (isset($column['closure'])) {
+                $result .= $column['closure']($model);
+            } elseif (isset($column['widget'])) {
                 $result .= $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
             } else if ($column['format'] == 'image') {
                 if (!isset($column['baseUrl'])) {
