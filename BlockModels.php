@@ -138,7 +138,7 @@ class BlockModels extends \yii\base\Widget
 
             // TODO. DOCUMENT THIS !!!, turn it into something more similar to GridView so people is familiar with it.
             if (isset($column['closure'])) {
-                $result .= $column['closure']($model);
+                $result .= $column['closure']($model, $key, $index, $form);
             } elseif (isset($column['widget'])) {
                 $result .= $form->field($model, $column['attribute'], ['options' => $options])->widget($column['widget'], ['options' => $column['widget_options']]);
             } else if ($column['format'] == 'image') {
